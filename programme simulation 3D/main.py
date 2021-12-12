@@ -34,19 +34,45 @@ def rad(angle):
     return (angle/360)*2*np.pi
 
 
+def testRedondance(matrice: np.array):
+    """
+    Test les redondances
+    :param matrice: matrice 2D (i, Antenne)
+    :return:
+    """
+    eleUniques, compte = np.unique(matrice, return_counts=True, axis=0)
+    eleRedondants = eleUniques[compte > 1]
+    return eleRedondants, compte
+
+
 def test(pas: int, r: float, lambd: int, antennes: np.array) -> np.array:
     nbIterTheta = int(360 // pas)
     nbIterPhi = int(180 // pas)
     phases = np.zeros((nbIterTheta, nbIterPhi, 6))
 
-    for theta in range(0,360): #boucleSurTheta
-        for phi in range(0,180): #boucleSurPhi
+    for theta in range(0, 360): #boucleSurTheta
+        for phi in range(0, 180): #boucleSurPhi
             source = sphVersCart(np.array([r, rad(theta), rad(phi)]))
             distances = np.linalg.norm(antennes - source, axis=1) #renvoie les 6 distances
             phases[theta, phi] = (distances * np.pi * 2) / lambd % (2 * np.pi)
-    return phases
+    return np.around(phases, decimals=5)
 
 
+def testApplatie(pas: int, r: float, lambd: int, antennes: np.array) -> np.array: #Renvoie une liste en 2D, mieux pour chopper les redondances
+    nbIterTheta = int(360 // pas)
+    nbIterPhi = int(180 // pas)
+    phases = np.zeros((nbIterTheta*nbIterPhi, 6))
 
-Phases = test(1, 100, lamb, antennas)
+    i = 0
+    for theta in range(0, 360): #boucleSurTheta
+        for phi in range(0, 180): #boucleSurPhi
+            source = sphVersCart(np.array([r, rad(theta), rad(phi)]))
+            distances = np.linalg.norm(antennes - source, axis=1) #renvoie les 6 distances
+            phases[i] = (distances * np.pi * 2) / lambd % (2 * np.pi)
+            i += 1
+    return np.around(phases, decimals=5)
+
+Phases = testApplatie(1, 100, lamb, antennas)
+EleRedondants, compte = testRedondance(Phases)
+compteSuper = compte[compte>1]
 print(Phases)
