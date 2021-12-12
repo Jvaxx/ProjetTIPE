@@ -1,28 +1,9 @@
 import numpy as np
 c= 3*10**8.
-f = 10**8.
-r=100.
 
-pas = 1
-
-lam = c/f
-lamb = c/f
-"""Antennes = np.array ( [
-    [(lam / (8 * np.cos(np.pi/3))),0,np.pi/2],
-    [(lam / (8 * np.cos(np.pi/3))),2*np.pi/3,np.pi/2],
-    [(lam / (8 * np.cos(np.pi/3))),4*np.pi/3,np.pi/2],
-    [(lam / (8 * np.cos(np.pi/3))),0,0],
-    [(lam / (8 * np.cos(np.pi/3))),0,np.pi/2],
-    [(lam / (8 * np.cos(np.pi/3))),np.pi,np.pi/2]
-    ])"""
-
-antennas = np.array([[lamb/8, 0, 0], [0, np.sqrt((3*lamb**2)/8), 0], [-lamb/8, 0, 0],
-                    [0, 0, lamb/8], [0, -np.sqrt((3*lamb**2)/8), 0], [0, 0, -lamb/8]])
 
 def sphVersCart(X):
-    r = X[0]
-    theta = X[1]
-    phi = X[2]
+    r, theta, phi = X
     rsin_theta = r * np.sin(theta)
     x = rsin_theta * np.cos(phi)
     y = rsin_theta * np.sin(phi)
@@ -34,45 +15,44 @@ def rad(angle):
     return (angle/360)*2*np.pi
 
 
+def troisDTo2D(matrice3D: np.array): #rentrer matrice 3D uniquement
+    (a, b, d) = matrice3D.shape
+    Matrice2D = matrice3D.reshape(a*b, d)
+    return(Matrice2D)
+
+
 def testRedondance(matrice: np.array):
-    """
-    Test les redondances
-    :param matrice: matrice 2D (i, Antenne)
-    :return:
-    """
     eleUniques, compte = np.unique(matrice, return_counts=True, axis=0)
     eleRedondants = eleUniques[compte > 1]
-    return eleRedondants, compte
+    nbRedondance = compte[compte > 1]
+    return eleRedondants, nbRedondance
 
 
-def test(pas: int, r: float, lambd: int, antennes: np.array) -> np.array:
-    nbIterTheta = int(360 // pas)
-    nbIterPhi = int(180 // pas)
-    phases = np.zeros((nbIterTheta, nbIterPhi, 6))
+def simulationPhases(pas: float, r: float, freq: int) -> np.array:
+    lambd = freq/c
+    antennes = np.array([
+        [lambd / (8 * np.cos(np.pi / 3)), np.pi / 2, 0],
+        [lambd / (8 * np.cos(np.pi / 3)), np.pi / 2, 2 * np.pi / 3],
+        [lambd / (8 * np.cos(np.pi / 3)), np.pi / 2, 4 * np.pi / 3],
+        [lambd / (8 * np.cos(np.pi / 3)), 0, 0],
+        [lambd / (8 * np.cos(np.pi / 3)), 2 * np.pi / 3, 0],
+        [lambd / (8 * np.cos(np.pi / 3)), 2 * np.pi / 3, np.pi]])
+    antennesCart = np.array([sphVersCart(antennes[i]) for i in range(6)])
+    nIterTheta, nIterPhi = np.array([360, 180]) // pas
+    phases = np.zeros((nIterTheta, nIterPhi, 6))
 
-    for theta in range(0, 360): #boucleSurTheta
-        for phi in range(0, 180): #boucleSurPhi
-            source = sphVersCart(np.array([r, rad(theta), rad(phi)]))
-            distances = np.linalg.norm(antennes - source, axis=1) #renvoie les 6 distances
-            phases[theta, phi] = (distances * np.pi * 2) / lambd % (2 * np.pi)
+    theta, phi = 0., 0.
+    for t in range(nIterTheta):
+        for p in range(nIterPhi):
+            source = np.array([r, rad(theta), rad(phi)])
+            sourceCart = sphVersCart(source)
+            distances = np.linalg.norm(antennesCart - sourceCart, axis=1)
+            phases[t, p] = ((distances * np.pi * 2) / lambd) % (2 * np.pi)
+            phi += pas
+        theta += pas
     return np.around(phases, decimals=5)
 
 
-def testApplatie(pas: int, r: float, lambd: int, antennes: np.array) -> np.array: #Renvoie une liste en 2D, mieux pour chopper les redondances
-    nbIterTheta = int(360 // pas)
-    nbIterPhi = int(180 // pas)
-    phases = np.zeros((nbIterTheta*nbIterPhi, 6))
-
-    i = 0
-    for theta in range(0, 360): #boucleSurTheta
-        for phi in range(0, 180): #boucleSurPhi
-            source = sphVersCart(np.array([r, rad(theta), rad(phi)]))
-            distances = np.linalg.norm(antennes - source, axis=1) #renvoie les 6 distances
-            phases[i] = (distances * np.pi * 2) / lambd % (2 * np.pi)
-            i += 1
-    return np.around(phases, decimals=5)
-
-Phases = testApplatie(1, 100, lamb, antennas)
-EleRedondants, compte = testRedondance(Phases)
-compteSuper = compte[compte>1]
-print(Phases)
+phases = simulationPhases(2, 100, 10**8)
+a, b = testRedondance(troisDTo2D(phases))
+print(phases)
