@@ -42,7 +42,7 @@ def test(pas: int, r: float, lambd: int, antennes: np.array) -> np.array:
     for theta in range(0,360): #boucleSurTheta
         for phi in range(0,180): #boucleSurPhi
             source = sphVersCart(np.array([r, rad(theta), rad(phi)]))
-            distances = np.linalg.norm(antennes - source, axis=1)
+            distances = np.linalg.norm(antennes - source, axis=1) #renvoie les 6 distances
             phases[theta, phi] = (distances * np.pi * 2) / lambd % (2 * np.pi)
     return phases
 
