@@ -38,7 +38,8 @@ def simulationPhases(pas: float, r: float, freq: int) -> np.array:
         [lambd / (8 * np.cos(np.pi / 3)), 2 * np.pi / 3, 0],
         [lambd / (8 * np.cos(np.pi / 3)), 2 * np.pi / 3, np.pi]])
     antennesCart = np.array([sphVersCart(antennes[i]) for i in range(6)])
-    nIterTheta, nIterPhi = np.array([360, 180]) // pas
+    nIterTheta = int(360 // pas)
+    nIterPhi = int(180 // pas)
     phases = np.zeros((nIterTheta, nIterPhi, 6))
 
     theta, phi = 0., 0.
@@ -50,9 +51,9 @@ def simulationPhases(pas: float, r: float, freq: int) -> np.array:
             phases[t, p] = ((distances * np.pi * 2) / lambd) % (2 * np.pi)
             phi += pas
         theta += pas
-    return np.around(phases, decimals=5)
+    return np.around(phases, decimals=1)
 
 
-phases = simulationPhases(2, 100, 10**8)
+phases = simulationPhases(15, 100, 10**8)
 a, b = testRedondance(troisDTo2D(phases))
 print(phases)
