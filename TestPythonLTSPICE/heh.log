@@ -1,0 +1,76 @@
+Circuit: * C:\Users\jeanv\Documents\Cours\TIPE\TestPythonLTSPICE\SimuSonore.asc
+
+Questionable use of curly braces in "b§gi10 98 45 i={if((v(z)/v(w))<(2.01/21),(v(xout)*v(yout))/(1.05*(1-(v(z)/v(w)))),((v(xout)*v(yout))/(1.05)))} "
+    Error: undefined symbol in: "if(([v](z)/v(w))<(2.01/21),(v(xout)*v(yout))/(1.05*(1-(v(z)/v(w)))),((v(xout)*v(yout))/(1.05)))"
+Questionable use of curly braces in "b§gi10 98 45 i={if((v(z)/v(w))<(2.01/21),(v(xout)*v(yout))/(1.05*(1-(v(z)/v(w)))),((v(xout)*v(yout))/(1.05)))} "
+    Error: undefined symbol in: "if(([v](z)/v(w))<(2.01/21),(v(xout)*v(yout))/(1.05*(1-(v(z)/v(w)))),((v(xout)*v(yout))/(1.05)))"
+Early termination of direct N-R iteration.
+Direct Newton iteration failed to find .op point.  (Use ".option noopiter" to skip.)
+Starting Gmin stepping
+Gmin = 10
+vernier = 0.5
+vernier = 0.25
+vernier = 0.125
+Gmin = 5.5165
+vernier = 0.0625
+vernier = 0.03125
+vernier = 0.015625
+vernier = 0.0078125
+Gmin = 5.49501
+vernier = 0.00390625
+vernier = 0.00195313
+vernier = 0.000976563
+vernier = 0.000488281
+Gmin = 5.50104
+Gmin = 0
+Gmin stepping failed
+
+Starting source stepping with srcstepmethod=0
+Source Step = 3.0303%
+Source Step = 12.1212%
+Source Step = 19.697%
+Source Step = 27.2727%
+Source Step = 34.8485%
+Source Step = 42.4242%
+vernier = 0.375
+Source Step = 52.6515%
+Source Step = 64.0152%
+Source Step = 75.3788%
+Source Step = 86.7424%
+Source Step = 98.1061%
+vernier = 0.09375
+Source Step = 99.8106%
+Source stepping succeeded in finding the operating point.
+
+
+amplitude1: (v(sortiecrete1))=0.752722
+amplitude2: (v(sortiecrete2))=0.747136
+amplitude3: (v(sortiecrete3))=0.739959
+amplitudefondmult1: (v(sortiepb1))=-0.0489451
+amplitudefondmult2: (v(sortiepb2))=-0.246787
+dephasage1o: arccos(2*amplitudefondmult1*1.13 / (amplitude2*amplitude1))=101.343
+dephasage2o: arccos(2*amplitudefondmult2*1.13 / (amplitude3*amplitude1))=-1.#IND
+direction11o: arcsin(-dephasage1o*2.0/(360))+60=25.7351
+direction12o: -(arcsin(-dephasage1o*2.0/(360)))+60=94.2649
+direction21o: arcsin(-dephasage2o*2.0/(360))-60=1.#QNAN
+direction22o: -(arcsin(-dephasage2o*2.0/(360)))-60=-1.#IND
+
+
+Date: Wed May 18 17:17:10 2022
+Total elapsed time: 105.986 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 2784602
+traniter = 2779634
+tranpoints = 446097
+accept = 334284
+rejected = 111813
+matrix size = 318
+fillins = 1039
+solver = Normal
+Thread vector: 35.9/11.4[9] 11.9/5.8[9] 8.8/4.0[9] 2.2/5.4[1]  2592/500
+Matrix Compiler1: 81.80 KB object code size  23.2/12.2/[5.3]
+Matrix Compiler2: 43.95 KB object code size  16.2/12.6/[4.3]
+

@@ -1,0 +1,75 @@
+* C:\Users\jeanv\Documents\Cours\TIPE\TestPythonLTSPICE\SimuSonore.asc
+V1 Micro1 0 SINE(0 2m {Frequence} 0 0 {Phase1})
+V4 Micro2 0 SINE(0 2m {Frequence} 0 0 {Phase2})
+V7 Micro3 0 SINE(0 2m {Frequence} 0 0 {Phase3})
+XU4 Signal1 0 N015 0 SortieMult1 N013 0 Signal2 AD835
+V10 N015 0 -5
+V11 N013 0 5
+XU5 Signal1 SortieCrete1 P001 N004 N005 TL074
+D1 N005 SortieCrete1 BAT54
+C1 SortieCrete1 0 {creteCond}
+V12 P001 0 15
+V13 N004 0 -15
+R7 SortieCrete1 0 {creteRes}
+XU6 Signal2 SortieCrete2 P002 N006 N007 TL074
+D2 N007 SortieCrete2 BAT54
+C2 SortieCrete2 0 {creteCond}
+V14 P002 0 15
+V15 N006 0 -15
+R8 SortieCrete2 0 {creteRes}
+XU7 Signal3 SortieCrete3 P003 N008 N009 TL074
+D3 N009 SortieCrete3 BAT54
+C3 SortieCrete3 0 {creteCond}
+V16 P003 0 15
+V17 N008 0 -15
+R9 SortieCrete3 0 {creteRes}
+R10 SortieMult1 SortiePB1 {multPBRes}
+C4 SortiePB1 0 {multPBCond}
+XU8 Signal1 0 N016 0 SortieMult2 N014 0 Signal3 AD835
+V18 N016 0 -5
+V19 N014 0 5
+R11 SortieMult2 SortiePB2 {multPBRes}
+C5 SortiePB2 0 {multPBCond}
+R12 N018 Micro1 {ampliAntenneRes1}
+C6 N019 N018 {ampliAntenneCond}
+XU9 0 N019 P004 N017 Signal1 TL074
+V20 P004 0 15
+V21 N017 0 -15
+R13 Signal1 N019 {ampliAntenneRes3}
+C7 Signal1 N018 {ampliAntenneCond}
+R14 0 N018 {ampliAntenneRes2}
+R1 N011 Micro2 {ampliAntenneRes1}
+C8 N012 N011 {ampliAntenneCond}
+XU1 0 N012 P005 N010 Signal2 TL074
+V2 P005 0 15
+V3 N010 0 -15
+R2 Signal2 N012 {ampliAntenneRes3}
+C9 Signal2 N011 {ampliAntenneCond}
+R3 0 N011 {ampliAntenneRes2}
+R4 N002 Micro3 {ampliAntenneRes1}
+C10 N003 N002 {ampliAntenneCond}
+XU2 0 N003 P006 N001 Signal3 TL074
+V5 P006 0 15
+V6 N001 0 -15
+R5 Signal3 N003 {ampliAntenneRes3}
+C11 Signal3 N002 {ampliAntenneCond}
+R6 0 N002 {ampliAntenneRes2}
+.model D D
+.lib C:\Users\jeanv\Documents\LTspiceXVII\lib\cmp\standard.dio
+.PARAM ampliAntenneRes1=200
+.PARAM ampliAntenneRes2 = 350
+.PARAM ampliAntenneRes3 = 210k
+.PARAM ampliAntenneCond = 100n
+.PARAM creteRes = 500k
+.PARAM creteCond = 1u
+.PARAM multPBRes = 100k
+.param multPBCond=1u
+.PARAM Phase1 = 261.34
+.PARAM Phase2 = 47.81
+.PARAM Phase3 = 259.36
+.PARAM Frequence = 300
+.tran 0.3
+.lib C:\Users\jeanv\Downloads\ad835.cir
+.lib C:\Users\jeanv\Downloads\TL074.301
+.backanno
+.end
