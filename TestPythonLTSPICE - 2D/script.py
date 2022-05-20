@@ -1,5 +1,6 @@
 import numpy as np
 import fonctions as fc
+from PyLTSpice.LTSpiceBatch import SimCommander
 
 
 # Parametres generaux
@@ -14,38 +15,18 @@ pointsAntennes = [
     [distanceEntreAntennes/(np.sqrt(3)), 4*np.pi/3],
 ]
 
-# angles = [np.pi/7, np.pi/3]
-# directions = []
-# for i, angle in enumerate(angles):
-#     pointSource = [1000, angle] # polaire
-#     phases = fc.calculDesPhases(pointSource, pointsAntennes)
-#     fc.lancerUneSimu(phases, 0.3, 'test' + str(i))
-#     dephasageSimu, directionSimu = fc.traitementSimu('test' + str(i))
-#     directions.append(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu))))
-#     print(f'simu {i+1} terminee')
 
-# print(fc.radToDeg(angles))
-# print(fc.radToDeg(directions))
+LTC = SimCommander('SimuSonore.asc')
+pointsTest = np.array([[1000, -np.pi/7]])
+directions = []
 
-pointSource = [1000, -np.pi/4] # polaire
-phases = fc.calculDesPhases(pointSource, pointsAntennes)
-fc.lancerUneSimu(phases, 0.3, 'testoune')
-dephasageSimu, directionSimu = fc.traitementSimu('testoune')
-print(fc.radToDeg(directionSimu))
-print(fc.radToDeg(fc.normaliserAnglePositif(directionSimu)))
-print(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu))))
+phasesList = [fc.calculDesPhases(point, pointsAntennes) for point in pointsTest]
+print(phasesList)
+for i, phases in enumerate(phasesList):
+    fc.lancerUneSimu(phases, 0.4, 'testoune' + str(i), LTC)
+    dephasageSimu, directionSimu = fc.traitementSimu('testoune' + str(i))
+    print(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu))))
+    directions.append(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu)))*np.pi/180)
+    print(directions)
 
-
-
-
-
-
-# print('-----------', '\n')
-# print('Phases initiales:          ', phases, '\n')
-# print('-----------', '\n')
-# print('Dephasage :                ', abs(phases[1] - phases[0]), abs(phases[2] - phases[0]))
-# print('Dephasage obtenu par theo: ', fc.radToDeg(dephasageTheo))
-# print('Dephasage obtenu par simu: ', fc.radToDeg(dephasageSimu), '\n')
-# print('-----------', '\n')
-# print('Directions theoriques:     ', fc.radToDeg(directionTheo))
-# print('Directions simu:           ', fc.radToDeg(directionSimu))
+fc.plotResultats(pointsTest[:, 1], directions, pointsAntennes)

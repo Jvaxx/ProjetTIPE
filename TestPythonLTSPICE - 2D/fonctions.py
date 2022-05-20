@@ -1,13 +1,15 @@
 import os
-from PyLTSpice.LTSpiceBatch import SimCommander
+import time
 from PyLTSpice.LTSpice_RawRead import LTSpiceRawRead
+from cv2 import pointPolygonTest
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 celerite = 342
 frequence = 300
 longueurOnde = celerite/frequence
-distanceEntreAntennes = longueurOnde/6
+distanceEntreAntennes = longueurOnde/3
 
 
 def traitementSimu(nomSimu: str):
@@ -17,10 +19,13 @@ def traitementSimu(nomSimu: str):
     amplitude1 = list(LTR.get_trace('V(sortiecrete1)'))[-1]
     amplitude2 = list(LTR.get_trace('V(sortiecrete2)'))[-1]
     amplitude3 = list(LTR.get_trace('V(sortiecrete3)'))[-1]
-    amplitudeFondamentalMult1 = list(LTR.get_trace('V(sortiepb1)'))[-1]
-    amplitudeFondamentalMult2 = list(LTR.get_trace('V(sortiepb2)'))[-1]
 
-    correcteurMultiplieur = 1.13
+    valeursMult1 = np.array(list(LTR.get_trace('V(sortiemult1)')[-500:]))
+    valeursMult2 = np.array(list(LTR.get_trace('V(sortiemult2)')[-500:]))
+    amplitudeFondamentalMult1 = (np.max(valeursMult1) + np.min(valeursMult1))/2
+    amplitudeFondamentalMult2 = (np.max(valeursMult2) + np.min(valeursMult2))/2
+
+    correcteurMultiplieur = 1.07
 
     # en radians
     dephasages = [
@@ -31,15 +36,18 @@ def traitementSimu(nomSimu: str):
     ]
 
     # en radians
+    preAsin = [
+        preAsinTraitement(-dephasages[0] * (longueurOnde / distanceEntreAntennes) / (2 * np.pi)),
+        preAsinTraitement(-dephasages[0] * (longueurOnde / distanceEntreAntennes) / (2 * np.pi)),
+        preAsinTraitement(-dephasages[1] * (longueurOnde / distanceEntreAntennes) / (2 * np.pi)),
+        preAsinTraitement(-dephasages[1] * (longueurOnde / distanceEntreAntennes) / (2 * np.pi)),
+    ]
+
     directions = [
-        (np.arcsin(-dephasages[0] * (longueurOnde / distanceEntreAntennes) /
-            (2 * np.pi)) + np.pi/3),
-        (-np.arcsin(-dephasages[0] * (longueurOnde / distanceEntreAntennes) /
-            (2 * np.pi)) + np.pi/3),
-        (np.arcsin(-dephasages[1] * (longueurOnde / distanceEntreAntennes) /
-            (2 * np.pi)) - np.pi/3),
-        (-np.arcsin(-dephasages[1] * (longueurOnde / distanceEntreAntennes) /
-            (2 * np.pi)) - np.pi/3),
+        (np.arcsin(preAsin[0]) + np.pi/3),
+        (-np.arcsin(preAsin[1]) + np.pi/3),
+        (np.arcsin(preAsin[2]) - np.pi/3),
+        (-np.arcsin(preAsin[3]) - np.pi/3),
     ]
 
     return dephasages, directions
@@ -87,8 +95,7 @@ def calculDesPhases(pointSource, pointsAntennes):
     return [phase1, phase2, phase3]
 
 
-def lancerUneSimu(phases: list, duree: float, nomFichier: str):
-    LTC = SimCommander('SimuSonore.asc')
+def lancerUneSimu(phases: list, duree: float, nomFichier: str, LTC):
 
     LTC.set_parameter('Phase1', f'{{{phases[0]}}}')
     LTC.set_parameter('Phase2', f'{{{phases[1]}}}')
@@ -96,9 +103,10 @@ def lancerUneSimu(phases: list, duree: float, nomFichier: str):
     LTC.set_parameter('Frequence', f'{{{frequence}}}')
 
     LTC.add_instruction(f'.tran {duree}')
-
+    
     LTC.run(run_filename=f'{nomFichier}.net')
     LTC.wait_completion()
+    LTC.reset_netlist()
 
 
 def trouverLaDirection(directions):
@@ -140,22 +148,22 @@ def radToDeg(angle):
     return (angle * 360) / (2*np.pi)
 
 
-# print('distances')
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[0])))
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[1])))
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[2])))
+def preAsinTraitement(valeur):
+    if -1 < valeur < 1:
+        return valeur
+    if valeur < -1:
+        return -1
+    if valeur > 1:
+        return 1
 
-# LTC.add_instructions(
-#     '.meas TRAN Amplitude1 PARAM (V(SortieCrete1))',
-#     '.meas TRAN Amplitude2 PARAM (V(SortieCrete2))',
-#     '.meas TRAN Amplitude3 PARAM (V(SortieCrete3))',
-#     '.meas TRAN AmplitudeFondMult1 PARAM (V(SortiePB1))',
-#     '.meas TRAN AmplitudeFondMult2 PARAM (V(SortiePB2))',
 
-#     '.meas TRAN dephasage1O PARAM arccos(2*AmplitudeFondMult1*1.13 / (Amplitude2*Amplitude1))',
-#     '.meas TRAN dephasage2O PARAM arccos(2*AmplitudeFondMult2*1.13 / (Amplitude3*Amplitude1))',
-#     f'.meas TRAN direction11O PARAM arcsin(-dephasage1O*{longueurOnde/distanceEntreAntennes}/(360))+60',
-#     f'.meas TRAN direction12O PARAM -(arcsin(-dephasage1O*{longueurOnde/distanceEntreAntennes}/(360)))+60',
-#     f'.meas TRAN direction21O PARAM arcsin(-dephasage2O*{longueurOnde/distanceEntreAntennes}/(360))-60',
-#     f'.meas TRAN direction22O PARAM -(arcsin(-dephasage2O*{longueurOnde/distanceEntreAntennes}/(360)))-60'
-# )
+def plotResultats(valeursInit, valeursExp, antennes):
+    antounettes = np.array(antennes)
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+    ax.scatter(antounettes[:,1], antounettes[:,0], c = 'red', marker = 'x')
+    rayonScatter = np.repeat([0.72], len(valeursInit))
+    ax.scatter(valeursInit, rayonScatter, c='red')
+    ax.scatter(valeursExp, rayonScatter, c='green')
+    ax.set_rticks([antounettes[0,0], 0.75])
+    ax.set_rmax(0.75)
+    plt.show()

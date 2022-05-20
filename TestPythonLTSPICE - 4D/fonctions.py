@@ -45,12 +45,6 @@ def calculDesPhases(pointSource, pointsAntennes):
     phasesNonNorm = (np.linalg.norm(ptSrc - ptsAnts, axis=1) % longueurOnde) * (360/longueurOnde)
     phases = normaliserAngleCentreArray(phasesNonNorm)
 
-    # phase1 = normaliserAngleCentre(((np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[0]))) 
-    #     % longueurOnde) * (360/longueurOnde))
-    # phase2 = normaliserAngleCentre(((np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[1]))) 
-    #     % longueurOnde) * (360/longueurOnde))
-    # phase3 = normaliserAngleCentre(((np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[2]))) 
-    #     % longueurOnde) * (360/longueurOnde))
     return phases
 
 
@@ -60,6 +54,9 @@ def lancerUneSimu(phases: list, duree: float, nomFichier: str):
     LTC.set_parameter('Phase1', f'{{{phases[0]}}}')
     LTC.set_parameter('Phase2', f'{{{phases[1]}}}')
     LTC.set_parameter('Phase3', f'{{{phases[2]}}}')
+    LTC.set_parameter('Phase3', f'{{{phases[3]}}}')
+    LTC.set_parameter('Phase3', f'{{{phases[4]}}}')
+    LTC.set_parameter('Phase3', f'{{{phases[5]}}}')
     LTC.set_parameter('Frequence', f'{{{frequence}}}')
 
     LTC.add_instruction(f'.tran {duree}')
@@ -117,22 +114,8 @@ def radToDeg(angle):
     return (angle * 360) / (2*np.pi)
 
 
-# print('distances')
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[0])))
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[1])))
-# print(np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[2])))
-
-# LTC.add_instructions(
-#     '.meas TRAN Amplitude1 PARAM (V(SortieCrete1))',
-#     '.meas TRAN Amplitude2 PARAM (V(SortieCrete2))',
-#     '.meas TRAN Amplitude3 PARAM (V(SortieCrete3))',
-#     '.meas TRAN AmplitudeFondMult1 PARAM (V(SortiePB1))',
-#     '.meas TRAN AmplitudeFondMult2 PARAM (V(SortiePB2))',
-
-#     '.meas TRAN dephasage1O PARAM arccos(2*AmplitudeFondMult1*1.13 / (Amplitude2*Amplitude1))',
-#     '.meas TRAN dephasage2O PARAM arccos(2*AmplitudeFondMult2*1.13 / (Amplitude3*Amplitude1))',
-#     f'.meas TRAN direction11O PARAM arcsin(-dephasage1O*{longueurOnde/distanceEntreAntennes}/(360))+60',
-#     f'.meas TRAN direction12O PARAM -(arcsin(-dephasage1O*{longueurOnde/distanceEntreAntennes}/(360)))+60',
-#     f'.meas TRAN direction21O PARAM arcsin(-dephasage2O*{longueurOnde/distanceEntreAntennes}/(360))-60',
-#     f'.meas TRAN direction22O PARAM -(arcsin(-dephasage2O*{longueurOnde/distanceEntreAntennes}/(360)))-60'
-# )
+def ajouterResultat(nomFichier: str, resultats):
+    with open(nomFichier, 'a') as fichier:
+        for result in resultats:
+            fichier.write(str(result) + ',')
+        fichier.write('\n')
