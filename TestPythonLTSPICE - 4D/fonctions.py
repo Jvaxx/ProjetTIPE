@@ -4,10 +4,12 @@ from PyLTSpice.LTSpice_RawRead import LTSpiceRawRead
 import numpy as np
 
 
-celerite = 342
+celerite = 340
 frequence = 300
 longueurOnde = celerite/frequence
-distanceEntreAntennes = longueurOnde/6
+distanceEntreAntennes = longueurOnde/5
+pasOptimalAbaque = 3
+nbrPlusProcheVoisin = 94
 
 
 def traitementSimu(nomSimu: str):
@@ -23,9 +25,9 @@ def traitementSimu(nomSimu: str):
         list(LTR.get_trace('V(sortiecrete6)'))[-1],
     ])
     fondamentauxMult = np.array([
+        list(LTR.get_trace('V(sortiepb1)'))[-1],
         list(LTR.get_trace('V(sortiepb2)'))[-1],
         list(LTR.get_trace('V(sortiepb3)'))[-1],
-        list(LTR.get_trace('V(sortiepb1)'))[-1],
         list(LTR.get_trace('V(sortiepb4)'))[-1],
         list(LTR.get_trace('V(sortiepb5)'))[-1],
     ])
@@ -54,9 +56,9 @@ def lancerUneSimu(phases: list, duree: float, nomFichier: str):
     LTC.set_parameter('Phase1', f'{{{phases[0]}}}')
     LTC.set_parameter('Phase2', f'{{{phases[1]}}}')
     LTC.set_parameter('Phase3', f'{{{phases[2]}}}')
-    LTC.set_parameter('Phase3', f'{{{phases[3]}}}')
-    LTC.set_parameter('Phase3', f'{{{phases[4]}}}')
-    LTC.set_parameter('Phase3', f'{{{phases[5]}}}')
+    LTC.set_parameter('Phase4', f'{{{phases[3]}}}')
+    LTC.set_parameter('Phase5', f'{{{phases[4]}}}')
+    LTC.set_parameter('Phase6', f'{{{phases[5]}}}')
     LTC.set_parameter('Frequence', f'{{{frequence}}}')
 
     LTC.add_instruction(f'.tran {duree}')
