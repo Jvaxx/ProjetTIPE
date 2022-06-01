@@ -13,6 +13,11 @@ distanceEntreAntennes = longueurOnde/3
 
 
 def traitementSimu(nomSimu: str):
+    """
+    Programme traitant une simulation dont les données sont dans le fichier nomSimu
+    """
+
+    # Lecteur de la simu
     LTR = LTSpiceRawRead(f'{nomSimu}.raw')
 
     # Recuperation des listes de valeurs
@@ -54,6 +59,10 @@ def traitementSimu(nomSimu: str):
 
 
 def traitementTheorique(phases: list, amplitude: float):
+    """
+    Meme que le prgm de traitement par LTSpice mais en generant tout de A a Z et sans passer par LTSpice donc
+    """
+
     points = np.linspace(0, 0.5, 7000)
     signaux = np.array([
         np.sin(points * 300 * 2 * np.pi + phases[0] * np.pi / 180),
@@ -86,6 +95,10 @@ def traitementTheorique(phases: list, amplitude: float):
 
 
 def calculDesPhases(pointSource, pointsAntennes):
+    """
+    Calcule les 3 phases à injecter dans LTSpice pour un set d'antennes données et un point source.
+    Fonctionne en 3D comme en 2D
+    """
     phase1 = normaliserAngleCentre(((np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[0]))) 
         % longueurOnde) * (360/longueurOnde))
     phase2 = normaliserAngleCentre(((np.linalg.norm(cylVersCart(pointSource) - cylVersCart(pointsAntennes[1]))) 
@@ -96,7 +109,12 @@ def calculDesPhases(pointSource, pointsAntennes):
 
 
 def lancerUneSimu(phases: list, duree: float, nomFichier: str, LTC):
+    """
+    Fonction de lancement d'une simu.
+    Prend en entrée les 3 phases des 3 antennes. Ecrit les resultats de la simu dans un fichier
+    """
 
+    # Mise en place des pramaetres de la simu
     LTC.set_parameter('Phase1', f'{{{phases[0]}}}')
     LTC.set_parameter('Phase2', f'{{{phases[1]}}}')
     LTC.set_parameter('Phase3', f'{{{phases[2]}}}')
@@ -104,12 +122,17 @@ def lancerUneSimu(phases: list, duree: float, nomFichier: str, LTC):
 
     LTC.add_instruction(f'.tran {duree}')
     
+    # Lancement simu
     LTC.run(run_filename=f'{nomFichier}.net')
     LTC.wait_completion()
     LTC.reset_netlist()
 
 
 def trouverLaDirection(directions):
+    """
+    Le traitement de simu donne 4 directions possibles, dont 2 qui sont proches.
+    Cette fonction revoie les 2 element les plus proches d'une liste. Tres mal optimisée.
+    """
     marges = [
         abs(directions[2] - directions[0]),
         abs(directions[3] - directions[0]),
@@ -128,11 +151,17 @@ def cylVersCart(point):
 
 
 def normaliserAngleCentre(angle):
+    """
+    Fonction de [0; 2*pi] --> [-pi; pi]
+    """
     if 0 <= angle <= 180: return angle
     if angle >= 180: return angle - 360
 
 
 def normaliserAnglePositif(angles): #en radians
+    """
+    Ramene l'angle dans l'intervalle [0; pi]
+    """
     res = []
     for angle in angles:
         if angle < 0:
@@ -149,6 +178,9 @@ def radToDeg(angle):
 
 
 def preAsinTraitement(valeur):
+    """
+    Prend en considération les cas limites
+    """
     if -1 < valeur < 1:
         return valeur
     if valeur < -1:
@@ -158,6 +190,9 @@ def preAsinTraitement(valeur):
 
 
 def plotResultats(valeursInit, valeursExp, antennes):
+    """
+    Plot en polaire des resultats
+    """
     antounettes = np.array(antennes)
     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
     ax.scatter(antounettes[:,1], antounettes[:,0], c = 'red', marker = 'x')
