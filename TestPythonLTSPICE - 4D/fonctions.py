@@ -7,35 +7,30 @@ import numpy as np
 celerite = 340
 frequence = 300
 longueurOnde = celerite/frequence
-distanceEntreAntennes = longueurOnde/5
+distanceEntreAntennes = longueurOnde/2
 pasOptimalAbaque = 3
 nbrPlusProcheVoisin = 94
 
 
 def traitementSimu(nomSimu: str):
-    LTR = LTSpiceRawRead(f'{nomSimu}.raw')
+    LTR = LTSpiceRawRead(f'SimuSonore.raw')
+    # LTR = LTSpiceRawRead(f'{nomSimu}.raw')
 
     # Recuperation des listes de valeurs
-    amplitudes = np.array([
-        list(LTR.get_trace('V(sortiecrete1)'))[-1],
-        list(LTR.get_trace('V(sortiecrete2)'))[-1],
-        list(LTR.get_trace('V(sortiecrete3)'))[-1],
-        list(LTR.get_trace('V(sortiecrete4)'))[-1],
-        list(LTR.get_trace('V(sortiecrete5)'))[-1],
-        list(LTR.get_trace('V(sortiecrete6)'))[-1],
-    ])
-    fondamentauxMult = np.array([
-        list(LTR.get_trace('V(sortiepb1)'))[-1],
-        list(LTR.get_trace('V(sortiepb2)'))[-1],
-        list(LTR.get_trace('V(sortiepb3)'))[-1],
-        list(LTR.get_trace('V(sortiepb4)'))[-1],
-        list(LTR.get_trace('V(sortiepb5)'))[-1],
-    ])
+    amplitudes = np.array([list(LTR.get_trace(f'V(sortiecrete{i+1})'))[-1] for i in range(6)])
+    ampFondamentalesMult = np.array([list(LTR.get_trace(f'V(sortiepb{i+1})'))[-1] for i in range(30)])
+    correcteurMultiplieur = 1.10
 
-    correcteurMultiplieur = 1.13
+    amplitudes30 = np.empty(30)
+    for i in range(6):
+        amplitudes30[i:i+5] = np.delete(amplitudes, i, axis=0)*amplitudes[i]
+    
 
     # en radians
-    dephasages = np.arccos(2*correcteurMultiplieur*fondamentauxMult/(amplitudes[1:]*amplitudes[0]))
+    preAcos = 2*ampFondamentalesMult*correcteurMultiplieur/amplitudes30
+    preAcos[preAcos>1] = 1
+    preAcos[preAcos<-1] = -1
+    dephasages = np.arccos(preAcos)
 
 
     return dephasages
@@ -53,12 +48,9 @@ def calculDesPhases(pointSource, pointsAntennes):
 def lancerUneSimu(phases: list, duree: float, nomFichier: str):
     LTC = SimCommander('SimuSonore.asc')
 
-    LTC.set_parameter('Phase1', f'{{{phases[0]}}}')
-    LTC.set_parameter('Phase2', f'{{{phases[1]}}}')
-    LTC.set_parameter('Phase3', f'{{{phases[2]}}}')
-    LTC.set_parameter('Phase4', f'{{{phases[3]}}}')
-    LTC.set_parameter('Phase5', f'{{{phases[4]}}}')
-    LTC.set_parameter('Phase6', f'{{{phases[5]}}}')
+    for i in range(6):
+        LTC.set_parameter(f'Phase{i+1}', f'{{{phases[i]}}}')
+
     LTC.set_parameter('Frequence', f'{{{frequence}}}')
 
     LTC.add_instruction(f'.tran {duree}')

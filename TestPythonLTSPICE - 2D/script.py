@@ -16,17 +16,19 @@ pointsAntennes = [
 ]
 
 
-LTC = SimCommander('SimuSonore.asc')
-pointsTest = np.array([[1000, -np.pi/7]])
-directions = []
+# LTC = SimCommander('SimuSonore.asc')
+pointsTest = np.array([[10, -np.pi/7]])
+# directions = []
 
 phasesList = [fc.calculDesPhases(point, pointsAntennes) for point in pointsTest]
-print(phasesList)
-for i, phases in enumerate(phasesList):
-    fc.lancerUneSimu(phases, 0.4, 'testoune' + str(i), LTC)
-    dephasageSimu, directionSimu = fc.traitementSimu('testoune' + str(i))
-    print(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu))))
-    directions.append(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu)))*np.pi/180)
-    print(directions)
+print('phases: ', phasesList)
+print('dphi: ', np.diff(phasesList, axis=1))
+# print(phasesList)
+# for i, phases in enumerate(phasesList):
+#     fc.lancerUneSimu(phases, 0.4, 'testoune' + str(i), LTC)
+#     dephasageSimu, directionSimu = fc.traitementSimu('testoune' + str(i))
+#     print(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu))))
+#     directions.append(fc.trouverLaDirection(fc.radToDeg(fc.normaliserAnglePositif(directionSimu)))*np.pi/180)
+#     print(directions)
 
-fc.plotResultats(pointsTest[:, 1], directions, pointsAntennes)
+# fc.plotResultats(pointsTest[:, 1], directions, pointsAntennes)
